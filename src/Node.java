@@ -14,7 +14,7 @@ public class Node extends JButton implements ActionListener {
     // fCost: The total cost of (G + H).
 
     int gCost, hCost, fCost;
-    boolean start, goal, solid, open, checked;
+    boolean start, goal, solid, open, checked, clicked;
 
     public Node(int theRow, int theCol) {
         col = theCol;
@@ -22,6 +22,7 @@ public class Node extends JButton implements ActionListener {
         setBackground(Color.white);
         setForeground(Color.BLACK);
         addActionListener(this);
+        clicked = false;
     }
 
     public void setAsStart() {
@@ -41,10 +42,30 @@ public class Node extends JButton implements ActionListener {
         setForeground(Color.black);
         solid = true;
     }
-
+    public void setAsOpen() {
+        open =true;
+    }
+    public void setAsChecked(){
+        if(!start && !goal){
+            setBackground(Color.orange);
+            setForeground(Color.black);
+        }
+        checked = true;
+    }
+    public void setAsPath(){
+        setBackground(Color.green);
+        setForeground(Color.black);
+    }
     @Override
     public void actionPerformed(ActionEvent e) {
-        setBackground(Color.ORANGE);
+        if(clicked){
+            setBackground(Color.white);
+            clicked = false;
+        }else {
+            setBackground(Color.ORANGE);
+            clicked = true;
+        }
+
     }
 
 }

@@ -1,21 +1,27 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class Panel extends JPanel {
 
-    final int maxCol =15;
-    final int maxRow = 10;
-    final int nodeSize = 70;
+    final int maxCol =150;
+    final int maxRow = 75;
+    final int nodeSize = 10;
     final int screenWidth = nodeSize * maxCol;
     final int screenHeight = nodeSize * maxRow;
-
+    int step = 0;
     Node[][] node = new Node[maxRow][maxCol];
     Node startNode, goalNode, currentNode;
+    ArrayList<Node> openList = new ArrayList<>();
+    ArrayList<Node> checkedList = new ArrayList<>();
+    boolean goalReached = false;
 
     Panel(){
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.BLACK);
         this.setLayout(new GridLayout(maxRow,maxCol));
+        this.addKeyListener(new KeyHandler(this));
+        this.setFocusable(true);
 
         int row = 0;
         int col = 0;
@@ -29,17 +35,12 @@ public class Panel extends JPanel {
                 row++;
             }
         }
-        setStartNode(7,2);
-        setGoalNode(2,12);
+        setStartNode(65,2);
+        setGoalNode(2,145);
 
-        setSolidNode(2,7);
-        setSolidNode(2,8);
-        setSolidNode(2,9);
-        setSolidNode(2,10);
-        setSolidNode(2,11);
-        setSolidNode(3,11);
-        setSolidNode(3,12);
-        setSolidNode(3,13);
+       for (int i = 1; i < 74; i++){
+           setSolidNode(i, 100);
+       }
 
         setCostOnNodes();
 
@@ -84,5 +85,120 @@ public class Panel extends JPanel {
         if(node != startNode && node != goalNode){
             node.setText("<html>F:" + node.fCost + "<br>G:" + node.gCost + "</html>");
         }
+    }
+
+    public void aStarSearch(){
+        long startTime = System.currentTimeMillis();
+        while (!goalReached){
+            int col = currentNode.col;
+            int row = currentNode.row;
+            step++;
+            currentNode.setAsChecked();
+            checkedList.add(currentNode);
+            openList.remove(currentNode);
+
+            if(row - 1 >= 0){
+                openNode(node[row-1][col]);
+            }
+            if(row + 1 <= maxRow){
+                openNode(node[row+1][col]);
+            }
+            if(col - 1 >= 0){
+                openNode(node[row][col-1]);
+            }
+            if(col + 1 <= maxCol){
+                openNode(node[row][col+1]);
+            }
+            int bestNodeIndex = 0;
+            int bestNodeFCost = Integer.MAX_VALUE;
+
+
+            for (int i = 0; i < openList.size(); i++) {
+                // Check if this node's F cost is better.
+                if (openList.get(i).fCost < bestNodeFCost){
+                    bestNodeIndex = i;
+                    bestNodeFCost = openList.get(i).fCost;
+                }
+                // Check if this node's G cost is better.
+                else if (openList.get(i).fCost == bestNodeFCost){
+                   if (openList.get(i).gCost < openList.get(bestNodeIndex).gCost){
+                       bestNodeIndex = i;
+                   }
+                }
+            }
+            // Get the next best node for out next step.
+            currentNode = openList.get(bestNodeIndex);
+            if (currentNode == goalNode) {
+                goalReached = true;
+                trackThePath();
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("Time: " + (endTime - startTime));
+    }
+
+    private void openNode(Node node) {
+        if (!node.open && !node.checked && !node.solid){
+            node.setAsOpen();
+            node.parent = currentNode;
+            openList.add(node);
+        }
+    }
+
+    private void trackThePath(){
+        Node current = goalNode;
+        while(current != startNode){
+            current = current.parent;
+            if(current != startNode) {
+                current.setAsPath();
+            }
+        }
+    }
+
+    public void ManualSearch(){
+        if (!goalReached){
+            int col = currentNode.col;
+            int row = currentNode.row;
+
+            currentNode.setAsChecked();
+            checkedList.add(currentNode);
+            openList.remove(currentNode);
+
+            if(row - 1 >= 0){
+                openNode(node[row-1][col]);
+            }
+            if(row + 1 <= maxRow){
+                openNode(node[row+1][col]);
+            }
+            if(col - 1 >= 0){
+                openNode(node[row][col-1]);
+            }
+            if(col + 1 <= maxCol){
+                openNode(node[row][col+1]);
+            }
+            int bestNodeIndex = 0;
+            int bestNodeFCost = Integer.MAX_VALUE;
+
+
+            for (int i = 0; i < openList.size(); i++) {
+                // Check if this node's F cost is better.
+                if (openList.get(i).fCost < bestNodeFCost){
+                    bestNodeIndex = i;
+                    bestNodeFCost = openList.get(i).fCost;
+                }
+                // Check if this node's G cost is better.
+                else if (openList.get(i).fCost == bestNodeFCost){
+                    if (openList.get(i).gCost < openList.get(bestNodeIndex).gCost){
+                        bestNodeIndex = i;
+                    }
+                }
+            }
+            // Get the next best node for out next step.
+            currentNode = openList.get(bestNodeIndex);
+            if (currentNode == goalNode) {
+                goalReached = true;
+            }
+        }
+
     }
 }
