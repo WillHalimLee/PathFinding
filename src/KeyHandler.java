@@ -16,9 +16,14 @@ public class KeyHandler implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
-        if(code == KeyEvent.VK_ENTER){
-            myPanel.aStarSearch();
+        if(code == KeyEvent.VK_1){
+
         }
+        if(code == KeyEvent.VK_2){
+            myPanel.setCostOnNodes();
+            myPanel.autoAStarSearch();
+        }
+
     }
 
     @Override

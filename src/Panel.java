@@ -1,11 +1,12 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class Panel extends JPanel {
 
     final int maxCol =150;
-    final int maxRow = 75;
+    final int maxRow =75;
     final int nodeSize = 10;
     final int screenWidth = nodeSize * maxCol;
     final int screenHeight = nodeSize * maxRow;
@@ -38,11 +39,9 @@ public class Panel extends JPanel {
         setStartNode(65,2);
         setGoalNode(2,145);
 
-       for (int i = 1; i < 74; i++){
-           setSolidNode(i, 100);
-       }
-
-        setCostOnNodes();
+        for (int i = 1; i < 74; i++){
+            setSolidNode(i, 100);
+        }
 
     }
 
@@ -58,12 +57,12 @@ public class Panel extends JPanel {
     private void setSolidNode(final int row, final int col) {
         node[row][col].setAsSolid();
     }
-    private void setCostOnNodes() {
+    public void setCostOnNodes() {
         int row = 0;
         int col = 0;
 
         while (row < maxRow && col < maxCol){
-         getCost(node[row][col]);
+         getCostSlow(node[row][col]);
             col++;
             if(col == maxCol) {
                 col = 0;
@@ -72,6 +71,23 @@ public class Panel extends JPanel {
         }
     }
     private void getCost(Node node){
+        int xDistance = Math.abs(node.col - startNode.col);
+        int yDistance = Math.abs(node.row - startNode.row);
+        node.gCost = (int) (Math.sqrt(xDistance + yDistance) * 10);
+
+        xDistance = node.col - goalNode.col;
+        yDistance = node.row - goalNode.row;
+        node.hCost = (int) (Math.sqrt(xDistance*xDistance + yDistance*yDistance) * 10);
+
+        node.fCost = node.gCost + node.hCost;
+
+//        if(node != startNode && node != goalNode){
+//            node.setText("<html>F:" + node.fCost + "<br>G:" + node.gCost + "<br>H: " + node.hCost + "</html>");
+//        }
+    }
+
+    // The first implementation. This calculation searches too many nodes.
+    private void getCostSlow(Node node){
         int xDistance = Math.abs(node.col - startNode.col);
         int yDistance = Math.abs(node.row - startNode.row);
         node.gCost = xDistance + yDistance;
@@ -87,8 +103,9 @@ public class Panel extends JPanel {
         }
     }
 
-    public void aStarSearch(){
+    public void autoAStarSearch(){
         long startTime = System.currentTimeMillis();
+        step++;
         while (!goalReached){
             int col = currentNode.col;
             int row = currentNode.row;
@@ -97,17 +114,37 @@ public class Panel extends JPanel {
             checkedList.add(currentNode);
             openList.remove(currentNode);
 
-            if(row - 1 >= 0){
+            // Top left
+            if(row - 1 > 0 && col - 1 > 0){
+                openNode(node[row-1][col-1]);
+            }
+            //Top mid
+            if(row - 1 > 0){
                 openNode(node[row-1][col]);
             }
-            if(row + 1 <= maxRow){
-                openNode(node[row+1][col]);
+            // Top right
+            if(row - 1 > 0 && col + 1 < maxCol){
+                openNode(node[row-1][col+1]);
             }
-            if(col - 1 >= 0){
+            // left
+            if(col - 1 > 0){
                 openNode(node[row][col-1]);
             }
-            if(col + 1 <= maxCol){
+            // right
+            if(col + 1 < maxCol){
                 openNode(node[row][col+1]);
+            }
+            // Bottom left
+            if(row + 1 < maxRow && col - 1 > 0){
+                openNode(node[row+1][col-1]);
+            }
+            // Bottom mid
+            if(row + 1 < maxRow){
+                openNode(node[row+1][col]);
+            }
+            // bottom right
+            if(row + 1 < maxRow && col + 1 < maxCol){
+                openNode(node[row+1][col+1]);
             }
             int bestNodeIndex = 0;
             int bestNodeFCost = Integer.MAX_VALUE;
@@ -135,6 +172,7 @@ public class Panel extends JPanel {
         }
         long endTime = System.currentTimeMillis();
         System.out.println("Time: " + (endTime - startTime));
+        System.out.println("Nodes visited : " + step);
     }
 
     private void openNode(Node node) {
@@ -155,8 +193,9 @@ public class Panel extends JPanel {
         }
     }
 
-    public void ManualSearch(){
+    public void mAStarSearch(){
         if (!goalReached){
+            step++;
             int col = currentNode.col;
             int row = currentNode.row;
 
@@ -164,17 +203,37 @@ public class Panel extends JPanel {
             checkedList.add(currentNode);
             openList.remove(currentNode);
 
-            if(row - 1 >= 0){
+            // Top left
+            if(row - 1 > 0 && col - 1 > 0){
+                openNode(node[row-1][col-1]);
+            }
+            //Top mid
+            if(row - 1 > 0){
                 openNode(node[row-1][col]);
             }
-            if(row + 1 <= maxRow){
-                openNode(node[row+1][col]);
+            // Top right
+            if(row - 1 > 0 && col + 1 < maxCol){
+                openNode(node[row-1][col+1]);
             }
-            if(col - 1 >= 0){
+            // left
+            if(col - 1 > 0){
                 openNode(node[row][col-1]);
             }
-            if(col + 1 <= maxCol){
+            // right
+            if(col + 1 < maxCol){
                 openNode(node[row][col+1]);
+            }
+            // Bottom left
+            if(row + 1 < maxRow && col - 1 > 0){
+                openNode(node[row+1][col-1]);
+            }
+            // Bottom mid
+            if(row + 1 < maxRow){
+                openNode(node[row+1][col]);
+            }
+            // bottom right
+            if(row + 1 < maxRow && col + 1 < maxCol){
+                openNode(node[row+1][col+1]);
             }
             int bestNodeIndex = 0;
             int bestNodeFCost = Integer.MAX_VALUE;
@@ -197,6 +256,7 @@ public class Panel extends JPanel {
             currentNode = openList.get(bestNodeIndex);
             if (currentNode == goalNode) {
                 goalReached = true;
+                trackThePath();
             }
         }
 
