@@ -1,30 +1,32 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
-public class Node extends JButton implements ActionListener {
+public class Node extends JButton {
 
     Node parent;
     int col;
     int row;
 
-    // gCost: Distance between current node and the start node
-    // hCost: Distance between current node and goal node
-    // fCost: The total cost of (G + H).
-
+    /**
+     * For A*.
+     * gCost: Distance between current node and the start node
+     * hCost: Distance between current node and goal node
+     * fCost: The total cost of (G + H).
+     */
     int gCost, hCost, fCost;
-    boolean start, goal, solid, open, checked, clicked;
+
+
+    boolean start, goal, solid, open, checked,clicked;
 
     public Node(int theRow, int theCol) {
         col = theCol;
         row = theRow;
         setBackground(Color.white);
         setForeground(Color.BLACK);
-        addActionListener(this);
-        clicked = false;
-    }
+        setEnabled(false);
 
+    }
     public void setAsStart() {
         setBackground(Color.blue);
         setForeground(Color.white);
@@ -42,6 +44,11 @@ public class Node extends JButton implements ActionListener {
         setForeground(Color.black);
         solid = true;
     }
+    public void setNotSolid(){
+        setBackground(Color.WHITE);
+        setForeground(Color.black);
+        solid = false;
+    }
     public void setAsOpen() {
         open =true;
     }
@@ -55,17 +62,6 @@ public class Node extends JButton implements ActionListener {
     public void setAsPath(){
         setBackground(Color.green);
         setForeground(Color.black);
-    }
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if(clicked){
-            setBackground(Color.white);
-            clicked = false;
-        }else {
-            setBackground(Color.ORANGE);
-            clicked = true;
-        }
-
     }
 
 }
