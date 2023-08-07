@@ -5,9 +5,9 @@ import java.util.ArrayList;
 
 public class Panel extends JPanel {
 
-    final int maxCol =150;
-    final int maxRow =75;
-    final int nodeSize = 10;
+    private int maxCol =150;
+    private int maxRow =75;
+    private int nodeSize = 10;
     final int screenWidth = nodeSize * maxCol;
     final int screenHeight = nodeSize * maxRow;
     int step = 0;
@@ -16,19 +16,19 @@ public class Panel extends JPanel {
     ArrayList<Node> openList = new ArrayList<>();
     ArrayList<Node> checkedList = new ArrayList<>();
     boolean goalReached = false;
-    boolean drawOn = false;
 
-    Panel(){
+    Panel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.BLACK);
         this.setLayout(new GridLayout(maxRow,maxCol));
         this.addKeyListener(new KeyHandler(this));
         this.setFocusable(true);
 
+
         int row = 0;
         int col = 0;
 
-        while (row < maxRow && col < maxCol){
+        while (row < maxRow && col < maxCol) {
             node[row][col] = new Node(row,col, this);
             add(node[row][col]);
             col++;
@@ -37,13 +37,29 @@ public class Panel extends JPanel {
                 row++;
             }
         }
-        setStartNode(65,2);
-        setGoalNode(2,145);
+        setStartNode(45,20);
+        setGoalNode(3,145);
+        setGraphTestC();
 
-        for (int i = 1; i < 74; i++){
-            setSolidNode(i, 100);
+    }
+
+
+    public void setGraphTestLine() {
+        for (int i = 3; i < 72; i++){
+            setSolidNode(i, 75);
         }
+    }
 
+    public void setGraphTestC(){
+
+        for (int i = 0; i < 10 ; i++) {
+            setSolidNode(45-i, 30);
+            setSolidNode(45+i, 30);
+        }
+        for (int i = 0; i < 20 ; i++) {
+            setSolidNode(35, 30-i);
+            setSolidNode(55, 30-i);
+        }
     }
 
     private void setStartNode(final int row, final int col) {
@@ -51,19 +67,22 @@ public class Panel extends JPanel {
         startNode = node[row][col];
         currentNode = startNode;
     }
+
     private void setGoalNode(final int row, final int col) {
         node[row][col].setAsGoal();
         goalNode = node[row][col];
     }
+
     private void setSolidNode(final int row, final int col) {
         node[row][col].setAsSolid();
     }
+
     public void setCostOnNodes() {
         int row = 0;
         int col = 0;
 
         while (row < maxRow && col < maxCol){
-         getCost    (node[row][col]);
+         getCost(node[row][col]);
             col++;
             if(col == maxCol) {
                 col = 0;
@@ -71,6 +90,7 @@ public class Panel extends JPanel {
             }
         }
     }
+
     private void getCost(Node node){
         int xDistance = Math.abs(node.col - startNode.col);
         int yDistance = Math.abs(node.row - startNode.row);
@@ -88,6 +108,7 @@ public class Panel extends JPanel {
     }
 
     // The first implementation. This calculation searches too many nodes.
+    // might be Dijkstra
     private void getCostSlow(Node node){
         int xDistance = Math.abs(node.col - startNode.col);
         int yDistance = Math.abs(node.row - startNode.row);
@@ -106,7 +127,6 @@ public class Panel extends JPanel {
 
     public void autoAStarSearch(){
         long startTime = System.currentTimeMillis();
-        step++;
         while (!goalReached){
             int col = currentNode.col;
             int row = currentNode.row;

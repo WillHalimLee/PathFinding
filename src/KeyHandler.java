@@ -17,17 +17,22 @@ public class KeyHandler implements KeyListener {
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
         if(code == KeyEvent.VK_1){
-        myPanel.mAStarSearch();
+            myPanel.setCostOnNodes();
         }
         if(code == KeyEvent.VK_2){
-            myPanel.setCostOnNodes();
+            myPanel.mAStarSearch();
+        }
+        if(code == KeyEvent.VK_3){
             myPanel.autoAStarSearch();
         }
+        if (code == KeyEvent.VK_R){
 
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
 
     }
+
 }

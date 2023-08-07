@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class Node extends JButton implements MouseListener {
+public class Node extends JButton {
 
     Node parent;
     int col;
@@ -18,7 +18,7 @@ public class Node extends JButton implements MouseListener {
     int gCost, hCost, fCost;
 
 
-    boolean start, goal, solid, open, checked,clicked;
+    boolean start, goal, solid, open, checked, clicked;
 
     public Node(int theRow, int theCol, Panel thePanel) {
         col = theCol;
@@ -26,7 +26,6 @@ public class Node extends JButton implements MouseListener {
         myPanel = thePanel;
         setBackground(Color.white);
         setForeground(Color.BLACK);
-        setEnabled(false);
 
     }
     public void setAsStart() {
@@ -64,30 +63,5 @@ public class Node extends JButton implements MouseListener {
     public void setAsPath(){
         setBackground(Color.green);
         setForeground(Color.black);
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        setAsSolid();
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
     }
 }
