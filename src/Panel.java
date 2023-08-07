@@ -5,9 +5,10 @@ import java.util.ArrayList;
 
 public class Panel extends JPanel {
 
-    private int maxCol =150;
-    private int maxRow =75;
-    private int nodeSize = 10;
+
+    private int maxRow = 15;
+    private int maxCol = 30;
+    private int nodeSize = 60;
     final int screenWidth = nodeSize * maxCol;
     final int screenHeight = nodeSize * maxRow;
     int step = 0;
@@ -37,21 +38,20 @@ public class Panel extends JPanel {
                 row++;
             }
         }
-        setStartNode(45,20);
-        setGoalNode(3,145);
-        setGraphTestC();
+        setStartNode(7,3);
+        setGoalNode(7,25);
+        setGraphTestLine();
 
     }
 
 
     public void setGraphTestLine() {
-        for (int i = 3; i < 72; i++){
-            setSolidNode(i, 75);
+        for (int i = 3; i < 14; i++){
+            setSolidNode(i, 10);
         }
     }
 
     public void setGraphTestC(){
-
         for (int i = 0; i < 10 ; i++) {
             setSolidNode(45-i, 30);
             setSolidNode(45+i, 30);
@@ -102,11 +102,25 @@ public class Panel extends JPanel {
 
         node.fCost = node.gCost + node.hCost;
 
-//        if(node != startNode && node != goalNode){
-//            node.setText("<html>F:" + node.fCost + "<br>G:" + node.gCost + "<br>H: " + node.hCost + "</html>");
-//        }
+        if(node != startNode && node != goalNode){
+            node.setText("<html>F:" + node.fCost + "<br>G:" + node.gCost + "<br>H: " + node.hCost + "</html>");
+        }
     }
+    private void getCost1(Node node){
+        int xDistance = node.col - startNode.col;
+        int yDistance = node.row - startNode.row;
+        node.gCost = (int) (Math.sqrt(xDistance*xDistance + yDistance*yDistance) * 10);
 
+        xDistance = node.col - goalNode.col;
+        yDistance = node.row - goalNode.row;
+        node.hCost = (int) (Math.sqrt(xDistance*xDistance + yDistance*yDistance) * 10);
+
+        node.fCost = node.gCost + node.hCost;
+
+        if(node != startNode && node != goalNode){
+            node.setText("<html>F:" + node.fCost + "<br>G:" + node.gCost + "<br>H: " + node.hCost + "</html>");
+        }
+    }
     // The first implementation. This calculation searches too many nodes.
     // might be Dijkstra
     private void getCostSlow(Node node){
@@ -121,7 +135,7 @@ public class Panel extends JPanel {
         node.fCost = node.gCost + node.hCost;
 
         if(node != startNode && node != goalNode){
-            node.setText("<html>F:" + node.fCost + "<br>G:" + node.gCost + "</html>");
+            node.setText("<html>F:" + node.fCost + "<br>G:" + node.gCost + "<br>H: " + node.hCost + "</html>");
         }
     }
 
@@ -196,25 +210,7 @@ public class Panel extends JPanel {
         System.out.println("Nodes visited : " + step);
     }
 
-    private void openNode(Node node) {
-        if (!node.open && !node.checked && !node.solid){
-            node.setAsOpen();
-            node.parent = currentNode;
-            openList.add(node);
-        }
-    }
-
-    private void trackThePath(){
-        Node current = goalNode;
-        while(current != startNode){
-            current = current.parent;
-            if(current != startNode) {
-                current.setAsPath();
-            }
-        }
-    }
-
-    public void mAStarSearch(){
+    public void mBFS() {
         if (!goalReached){
             step++;
             int col = currentNode.col;
@@ -254,6 +250,151 @@ public class Panel extends JPanel {
             }
             // bottom right
             if(row + 1 <= maxRow && col + 1 < maxCol){
+                openNode(node[row+1][col+1]);
+            }
+            int bestNodeIndex = 0;
+            int bestNodeHCost = Integer.MAX_VALUE;
+
+
+            for (int i = 0; i < openList.size(); i++) {
+                // Check if this node's F cost is better.
+                if (openList.get(i).hCost < bestNodeHCost){
+                    bestNodeIndex = i;
+                    bestNodeHCost = openList.get(i).hCost;
+                }
+            }
+            // Get the next best node for out next step.
+            currentNode = openList.get(bestNodeIndex);
+            if (currentNode == goalNode) {
+                goalReached = true;
+                trackThePath();
+            }
+        }
+    }
+    public void autoBFS(){
+        long startTime = System.currentTimeMillis();
+        while (!goalReached){
+            int col = currentNode.col;
+            int row = currentNode.row;
+            step++;
+            currentNode.setAsChecked();
+            checkedList.add(currentNode);
+            openList.remove(currentNode);
+
+            // Top left
+            if(row - 1 >= 0 && col - 1 > 0){
+                openNode(node[row-1][col-1]);
+            }
+            //Top mid
+            if(row - 1 >= 0){
+                openNode(node[row-1][col]);
+            }
+            // Top right
+            if(row - 1 >= 0 && col + 1 < maxCol){
+                openNode(node[row-1][col+1]);
+            }
+            // left
+            if(col - 1 >= 0){
+                openNode(node[row][col-1]);
+            }
+            // right
+            if(col + 1 <= maxCol){
+                openNode(node[row][col+1]);
+            }
+            // Bottom left
+            if(row + 1 <= maxRow && col - 1 > 0){
+                openNode(node[row+1][col-1]);
+            }
+            // Bottom mid
+            if(row + 1 <= maxRow){
+                openNode(node[row+1][col]);
+            }
+            // bottom right
+            if(row + 1 <= maxRow && col + 1 < maxCol){
+                openNode(node[row+1][col+1]);
+            }
+            int bestNodeIndex = 0;
+            int bestNodeHCost = Integer.MAX_VALUE;
+
+
+            for (int i = 0; i < openList.size(); i++) {
+                // Check if this node's F cost is better.
+                if (openList.get(i).hCost < bestNodeHCost){
+                    bestNodeIndex = i;
+                    bestNodeHCost = openList.get(i).hCost;
+                }
+            }
+            // Get the next best node for out next step.
+            currentNode = openList.get(bestNodeIndex);
+            if (currentNode == goalNode) {
+                goalReached = true;
+                trackThePath();
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("Time: " + (endTime - startTime));
+        System.out.println("Nodes visited : " + step);
+    }
+
+
+    private void openNode(Node node) {
+        if (!node.open && !node.checked && !node.solid){
+            node.setAsOpen();
+            node.parent = currentNode;
+            openList.add(node);
+        }
+    }
+
+    private void trackThePath(){
+        Node current = goalNode;
+        while(current != startNode){
+            current = current.parent;
+            if(current != startNode) {
+                current.setAsPath();
+            }
+        }
+    }
+
+    public void mAStarSearch(){
+        if (!goalReached){
+            step++;
+            int col = currentNode.col;
+            int row = currentNode.row;
+
+            currentNode.setAsChecked();
+            checkedList.add(currentNode);
+            openList.remove(currentNode);
+
+            // Top left
+            if(row - 1 > 0 && col - 1 > 0){
+                openNode(node[row-1][col-1]);
+            }
+            //Top mid
+            if(row - 1 > 0){
+                openNode(node[row-1][col]);
+            }
+            // Top right
+            if(row - 1 > 0 && col + 1 < maxCol){
+                openNode(node[row-1][col+1]);
+            }
+            // left
+            if(col - 1 > 0){
+                openNode(node[row][col-1]);
+            }
+            // right
+            if(col + 1 < maxCol){
+                openNode(node[row][col+1]);
+            }
+            // Bottom left
+            if(row + 1 < maxRow && col - 1 > 0){
+                openNode(node[row+1][col-1]);
+            }
+            // Bottom mid
+            if(row + 1 < maxRow){
+                openNode(node[row+1][col]);
+            }
+            // bottom right
+            if(row + 1 < maxRow && col + 1 < maxCol){
                 openNode(node[row+1][col+1]);
             }
             int bestNodeIndex = 0;
