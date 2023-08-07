@@ -16,6 +16,7 @@ public class Panel extends JPanel {
     ArrayList<Node> openList = new ArrayList<>();
     ArrayList<Node> checkedList = new ArrayList<>();
     boolean goalReached = false;
+    boolean drawOn = false;
 
     Panel(){
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -28,7 +29,7 @@ public class Panel extends JPanel {
         int col = 0;
 
         while (row < maxRow && col < maxCol){
-            node[row][col] = new Node(row,col);
+            node[row][col] = new Node(row,col, this);
             add(node[row][col]);
             col++;
             if(col == maxCol) {
@@ -62,7 +63,7 @@ public class Panel extends JPanel {
         int col = 0;
 
         while (row < maxRow && col < maxCol){
-         getCostSlow(node[row][col]);
+         getCost    (node[row][col]);
             col++;
             if(col == maxCol) {
                 col = 0;
@@ -115,35 +116,35 @@ public class Panel extends JPanel {
             openList.remove(currentNode);
 
             // Top left
-            if(row - 1 > 0 && col - 1 > 0){
+            if(row - 1 >= 0 && col - 1 > 0){
                 openNode(node[row-1][col-1]);
             }
             //Top mid
-            if(row - 1 > 0){
+            if(row - 1 >= 0){
                 openNode(node[row-1][col]);
             }
             // Top right
-            if(row - 1 > 0 && col + 1 < maxCol){
+            if(row - 1 >= 0 && col + 1 < maxCol){
                 openNode(node[row-1][col+1]);
             }
             // left
-            if(col - 1 > 0){
+            if(col - 1 >= 0){
                 openNode(node[row][col-1]);
             }
             // right
-            if(col + 1 < maxCol){
+            if(col + 1 <= maxCol){
                 openNode(node[row][col+1]);
             }
             // Bottom left
-            if(row + 1 < maxRow && col - 1 > 0){
+            if(row + 1 <= maxRow && col - 1 > 0){
                 openNode(node[row+1][col-1]);
             }
             // Bottom mid
-            if(row + 1 < maxRow){
+            if(row + 1 <= maxRow){
                 openNode(node[row+1][col]);
             }
             // bottom right
-            if(row + 1 < maxRow && col + 1 < maxCol){
+            if(row + 1 <= maxRow && col + 1 < maxCol){
                 openNode(node[row+1][col+1]);
             }
             int bestNodeIndex = 0;
@@ -204,35 +205,35 @@ public class Panel extends JPanel {
             openList.remove(currentNode);
 
             // Top left
-            if(row - 1 > 0 && col - 1 > 0){
+            if(row - 1 >= 0 && col - 1 > 0){
                 openNode(node[row-1][col-1]);
             }
             //Top mid
-            if(row - 1 > 0){
+            if(row - 1 >= 0){
                 openNode(node[row-1][col]);
             }
             // Top right
-            if(row - 1 > 0 && col + 1 < maxCol){
+            if(row - 1 >= 0 && col + 1 < maxCol){
                 openNode(node[row-1][col+1]);
             }
             // left
-            if(col - 1 > 0){
+            if(col - 1 >= 0){
                 openNode(node[row][col-1]);
             }
             // right
-            if(col + 1 < maxCol){
+            if(col + 1 <= maxCol){
                 openNode(node[row][col+1]);
             }
             // Bottom left
-            if(row + 1 < maxRow && col - 1 > 0){
+            if(row + 1 <= maxRow && col - 1 > 0){
                 openNode(node[row+1][col-1]);
             }
             // Bottom mid
-            if(row + 1 < maxRow){
+            if(row + 1 <= maxRow){
                 openNode(node[row+1][col]);
             }
             // bottom right
-            if(row + 1 < maxRow && col + 1 < maxCol){
+            if(row + 1 <= maxRow && col + 1 < maxCol){
                 openNode(node[row+1][col+1]);
             }
             int bestNodeIndex = 0;

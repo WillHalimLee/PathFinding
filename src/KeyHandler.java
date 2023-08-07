@@ -17,7 +17,7 @@ public class KeyHandler implements KeyListener {
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
         if(code == KeyEvent.VK_1){
-
+        myPanel.mAStarSearch();
         }
         if(code == KeyEvent.VK_2){
             myPanel.setCostOnNodes();
