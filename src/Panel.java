@@ -2,12 +2,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 public class Panel extends JPanel {
 
-    private int maxCol =150;
-    private int maxRow =75;
-    private int nodeSize = 10;
+
+    private int maxRow = 15;
+    private int maxCol = 30;
+    private int nodeSize = 60;
     final int screenWidth = nodeSize * maxCol;
     final int screenHeight = nodeSize * maxRow;
     int step = 0;
@@ -24,6 +27,27 @@ public class Panel extends JPanel {
         this.addKeyListener(new KeyHandler(this));
         this.setFocusable(true);
 
+        int row = 0;
+        int col = 0;
+
+        while (row < maxRow && col < maxCol) {
+            node[row][col] = new Node(row,col, this);
+            add(node[row][col]);
+            col++;
+            if(col == maxCol) {
+                col = 0;
+                row++;
+            }
+        }
+       setTest();
+    }
+
+    public void reset (){
+        this.removeAll();
+        openList.clear();
+        checkedList.clear();
+        step = 0;
+        goalReached = false;
 
         int row = 0;
         int col = 0;
@@ -37,21 +61,37 @@ public class Panel extends JPanel {
                 row++;
             }
         }
-        setStartNode(45,20);
-        setGoalNode(3,145);
-        setGraphTestC();
+        setTest();
 
     }
 
+    public void setCost() {
+        int row = 0;
+        int col = 0;
 
+        while (row < maxRow && col < maxCol) {
+            getCost(node[row][col]);
+            col++;
+            if(col == maxCol) {
+                col = 0;
+                row++;
+            }
+        }
+    }
+    /** This is what is used to set up the map*/
+    public void setTest(){
+        setStartNode(11,3);
+        setGoalNode(5,27);
+        setGraphTestLine();
+
+    }
     public void setGraphTestLine() {
-        for (int i = 3; i < 72; i++){
-            setSolidNode(i, 75);
+        for (int i = 3; i < 12; i++){
+            setSolidNode(i, 15);
         }
     }
 
     public void setGraphTestC(){
-
         for (int i = 0; i < 10 ; i++) {
             setSolidNode(45-i, 30);
             setSolidNode(45+i, 30);
@@ -76,28 +116,43 @@ public class Panel extends JPanel {
     private void setSolidNode(final int row, final int col) {
         node[row][col].setAsSolid();
     }
-
-    public void setCostOnNodes() {
-        int row = 0;
-        int col = 0;
-
-        while (row < maxRow && col < maxCol){
-         getCost(node[row][col]);
-            col++;
-            if(col == maxCol) {
-                col = 0;
-                row++;
-            }
+    private void openNode(Node node ) {
+        if (!node.open && !node.checked && !node.solid){
+            node.setAsOpen();
+            node.parent = currentNode;
+            openList.add(node);
         }
     }
 
-    private void getCost(Node node){
-        int xDistance = Math.abs(node.col - startNode.col);
-        int yDistance = Math.abs(node.row - startNode.row);
-        node.gCost = (int) (Math.sqrt(xDistance + yDistance) * 10);
+    private void trackThePath(){
+        Node current = goalNode;
+        int pathL = 0;
+        while(current != startNode){
+            current = current.parent;
+            if(current != startNode) {
+                current.setAsPath();
+                pathL++;
+            }
+        }
+        System.out.println("Path Length: " + pathL);
+    }
 
-        xDistance = node.col - goalNode.col;
-        yDistance = node.row - goalNode.row;
+    private void getCost(Node node){
+        if (node.parent != null) {
+            int deltaX = Math.abs(node.col - node.parent.col);
+            int deltaY = Math.abs(node.row - node.parent.row);
+
+            if (deltaX == 1 && deltaY == 1) {
+                // Diagonal movement
+                node.gCost = node.parent.gCost + 14;
+            } else {
+                // Horizontal or vertical movement
+                node.gCost = node.parent.gCost + 10;
+            }
+
+        }
+        int xDistance = node.col - goalNode.col;
+        int yDistance = node.row - goalNode.row;
         node.hCost = (int) (Math.sqrt(xDistance*xDistance + yDistance*yDistance) * 10);
 
         node.fCost = node.gCost + node.hCost;
@@ -107,81 +162,115 @@ public class Panel extends JPanel {
 //        }
     }
 
-    // The first implementation. This calculation searches too many nodes.
-    // might be Dijkstra
-    private void getCostSlow(Node node){
-        int xDistance = Math.abs(node.col - startNode.col);
-        int yDistance = Math.abs(node.row - startNode.row);
-        node.gCost = xDistance + yDistance;
-
-        xDistance = Math.abs(node.col - goalNode.col);
-        yDistance = Math.abs(node.row - goalNode.row);
-        node.hCost = xDistance + yDistance;
-
-        node.fCost = node.gCost + node.hCost;
-
-        if(node != startNode && node != goalNode){
-            node.setText("<html>F:" + node.fCost + "<br>G:" + node.gCost + "</html>");
+    public void checkAround(int row, int col) {
+        //Top mid
+        if(row - 1 > 0){
+            openNode(node[row-1][col]);
         }
+        // Right
+        if(col + 1 < maxCol){
+            openNode(node[row][col+1]);
+        }
+        // Bottom mid
+        if(row + 1 < maxRow){
+            openNode(node[row+1][col]);
+        }
+        // Left
+        if(col - 1 > 0){
+            openNode(node[row][col-1]);
+        }
+        // Top left
+        if(row - 1 > 0 && col - 1 > 0){
+            openNode(node[row-1][col-1]);
+        }
+        // Top right
+        if(row - 1 > 0 && col + 1 < maxCol){
+            openNode(node[row-1][col+1]);
+        }
+        // bottom right
+        if(row + 1 < maxRow && col + 1 < maxCol){
+            openNode(node[row+1][col+1]);
+        }
+        // Bottom left
+        if(row + 1 < maxRow && col - 1 > 0){
+            openNode(node[row+1][col-1]);
+        }
+
     }
 
-    public void autoAStarSearch(){
-        long startTime = System.currentTimeMillis();
-        while (!goalReached){
+    public void mAStar(){
+        if (!goalReached){
             int col = currentNode.col;
             int row = currentNode.row;
-            step++;
+
             currentNode.setAsChecked();
             checkedList.add(currentNode);
             openList.remove(currentNode);
+            if (currentNode != startNode){
+                currentNode.setAsCurrent();
+            }
 
-            // Top left
-            if(row - 1 >= 0 && col - 1 > 0){
-                openNode(node[row-1][col-1]);
-            }
-            //Top mid
-            if(row - 1 >= 0){
-                openNode(node[row-1][col]);
-            }
-            // Top right
-            if(row - 1 >= 0 && col + 1 < maxCol){
-                openNode(node[row-1][col+1]);
-            }
-            // left
-            if(col - 1 >= 0){
-                openNode(node[row][col-1]);
-            }
-            // right
-            if(col + 1 <= maxCol){
-                openNode(node[row][col+1]);
-            }
-            // Bottom left
-            if(row + 1 <= maxRow && col - 1 > 0){
-                openNode(node[row+1][col-1]);
-            }
-            // Bottom mid
-            if(row + 1 <= maxRow){
-                openNode(node[row+1][col]);
-            }
-            // bottom right
-            if(row + 1 <= maxRow && col + 1 < maxCol){
-                openNode(node[row+1][col+1]);
-            }
+           checkAround(row, col);
             int bestNodeIndex = 0;
             int bestNodeFCost = Integer.MAX_VALUE;
 
-
             for (int i = 0; i < openList.size(); i++) {
+                // Find the cost of traveling to this node.
+                getCost(openList.get(i));
+                openList.get(i).setAsChecked();
                 // Check if this node's F cost is better.
                 if (openList.get(i).fCost < bestNodeFCost){
                     bestNodeIndex = i;
                     bestNodeFCost = openList.get(i).fCost;
+                } else if (openList.get(i).fCost == bestNodeFCost){
+                    if (openList.get(i).hCost < openList.get(bestNodeIndex).hCost){
+                        bestNodeIndex = i;
+                        bestNodeFCost = openList.get(i).fCost;
+                    }
                 }
-                // Check if this node's G cost is better.
-                else if (openList.get(i).fCost == bestNodeFCost){
-                   if (openList.get(i).gCost < openList.get(bestNodeIndex).gCost){
-                       bestNodeIndex = i;
-                   }
+            }
+            // Get the next best node for out next step.
+            currentNode = openList.get(bestNodeIndex);
+            if (currentNode == goalNode) {
+                goalReached = true;
+                trackThePath();
+            }
+        }
+    }
+
+
+    public void autoAStar(){
+        long startTime = System.currentTimeMillis();
+        while (!goalReached){
+            int col = currentNode.col;
+            int row = currentNode.row;
+
+
+            checkedList.add(currentNode);
+            openList.remove(currentNode);
+
+            checkAround(row, col);
+
+            int bestNodeIndex = 0;
+            int bestNodeFCost = Integer.MAX_VALUE;
+
+            for (int i = 0; i < openList.size(); i++) {
+                // Find the cost of traveling to this node.
+                getCost(openList.get(i));
+                if(!openList.get(i).checked){
+                    step++;
+
+                openList.get(i).setAsChecked();
+                // Check if this node's F cost is better.
+                if (openList.get(i).fCost < bestNodeFCost){
+                    bestNodeIndex = i;
+                    bestNodeFCost = openList.get(i).fCost;
+                } else if (openList.get(i).fCost == bestNodeFCost){
+                    if (openList.get(i).hCost < openList.get(bestNodeIndex).hCost){
+                        bestNodeIndex = i;
+                        bestNodeFCost = openList.get(i).fCost;
+                    }
+                }
                 }
             }
             // Get the next best node for out next step.
@@ -193,84 +282,36 @@ public class Panel extends JPanel {
         }
         long endTime = System.currentTimeMillis();
         System.out.println("Time: " + (endTime - startTime));
-        System.out.println("Nodes visited : " + step);
+        System.out.println("Nodes Checked : " + step);
     }
 
-    private void openNode(Node node) {
-        if (!node.open && !node.checked && !node.solid){
-            node.setAsOpen();
-            node.parent = currentNode;
-            openList.add(node);
-        }
-    }
-
-    private void trackThePath(){
-        Node current = goalNode;
-        while(current != startNode){
-            current = current.parent;
-            if(current != startNode) {
-                current.setAsPath();
-            }
-        }
-    }
-
-    public void mAStarSearch(){
+    public void mBFS() {
         if (!goalReached){
             step++;
             int col = currentNode.col;
             int row = currentNode.row;
 
-            currentNode.setAsChecked();
             checkedList.add(currentNode);
             openList.remove(currentNode);
-
-            // Top left
-            if(row - 1 >= 0 && col - 1 > 0){
-                openNode(node[row-1][col-1]);
+            if (currentNode != startNode){
+                currentNode.setAsCurrent();
             }
-            //Top mid
-            if(row - 1 >= 0){
-                openNode(node[row-1][col]);
-            }
-            // Top right
-            if(row - 1 >= 0 && col + 1 < maxCol){
-                openNode(node[row-1][col+1]);
-            }
-            // left
-            if(col - 1 >= 0){
-                openNode(node[row][col-1]);
-            }
-            // right
-            if(col + 1 <= maxCol){
-                openNode(node[row][col+1]);
-            }
-            // Bottom left
-            if(row + 1 <= maxRow && col - 1 > 0){
-                openNode(node[row+1][col-1]);
-            }
-            // Bottom mid
-            if(row + 1 <= maxRow){
-                openNode(node[row+1][col]);
-            }
-            // bottom right
-            if(row + 1 <= maxRow && col + 1 < maxCol){
-                openNode(node[row+1][col+1]);
-            }
+            checkAround(row, col);
             int bestNodeIndex = 0;
-            int bestNodeFCost = Integer.MAX_VALUE;
+            int bestNodeHCost = Integer.MAX_VALUE;
 
 
             for (int i = 0; i < openList.size(); i++) {
-                // Check if this node's F cost is better.
-                if (openList.get(i).fCost < bestNodeFCost){
-                    bestNodeIndex = i;
-                    bestNodeFCost = openList.get(i).fCost;
+                // Find the cost of traveling to this node.
+                getCost(openList.get(i));
+                if(!openList.get(i).checked){
+                    step++;
                 }
-                // Check if this node's G cost is better.
-                else if (openList.get(i).fCost == bestNodeFCost){
-                    if (openList.get(i).gCost < openList.get(bestNodeIndex).gCost){
-                        bestNodeIndex = i;
-                    }
+                openList.get(i).setAsChecked();
+                // Check if this node's F cost is better.
+                if (openList.get(i).hCost < bestNodeHCost){
+                    bestNodeIndex = i;
+                    bestNodeHCost = openList.get(i).hCost;
                 }
             }
             // Get the next best node for out next step.
@@ -280,6 +321,119 @@ public class Panel extends JPanel {
                 trackThePath();
             }
         }
+    }
+    public void autoBFS(){
+        long startTime = System.currentTimeMillis();
+        while (!goalReached){
+            int col = currentNode.col;
+            int row = currentNode.row;
 
+            checkedList.add(currentNode);
+            openList.remove(currentNode);
+
+            checkAround(row, col);
+            int bestNodeIndex = 0;
+            int bestNodeHCost = Integer.MAX_VALUE;
+
+
+            for (int i = 0; i < openList.size(); i++) {
+                getCost(openList.get(i));
+                if(!openList.get(i).checked){
+                    step++;
+                }
+                openList.get(i).setAsChecked();
+
+                if (openList.get(i).hCost < bestNodeHCost){
+                    bestNodeIndex = i;
+                    bestNodeHCost = openList.get(i).hCost;
+                }
+            }
+            // Get the next best node for out next step.
+            currentNode = openList.get(bestNodeIndex);
+            if (currentNode == goalNode) {
+                goalReached = true;
+                trackThePath();
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("Time: " + (endTime - startTime));
+        System.out.println("Nodes Checked : " + step);
+    }
+
+    public void mDijkstra(){
+
+        if (!goalReached){
+            int col = currentNode.col;
+            int row = currentNode.row;
+
+            checkedList.add(currentNode);
+            openList.remove(currentNode);
+
+            if (currentNode != startNode){
+                currentNode.setAsCurrent();
+            }
+
+            checkAround(row, col);
+
+            int bestNodeIndex = 0;
+            int bestNodeGCost = Integer.MAX_VALUE;
+
+            for (int i = 0; i < openList.size(); i++) {
+                // Find the cost of traveling to this node.
+                getCost(openList.get(i));
+                openList.get(i).setAsChecked();
+                // Check if this node's G cost is better.
+                if (openList.get(i).gCost < bestNodeGCost){
+                    bestNodeIndex = i;
+                    bestNodeGCost = openList.get(i).gCost;
+                }
+            }
+            // Get the next best node for out next step.
+            currentNode = openList.get(bestNodeIndex);
+            if (currentNode == goalNode) {
+                goalReached = true;
+                trackThePath();
+            }
+        }
+    }
+    public void autoDijkstra(){
+        long startTime = System.currentTimeMillis();
+
+        while (!goalReached){
+            int col = currentNode.col;
+            int row = currentNode.row;
+
+            checkedList.add(currentNode);
+            openList.remove(currentNode);
+            checkAround(row, col);
+
+            int bestNodeIndex = 0;
+            int bestNodeGCost = Integer.MAX_VALUE;
+            for (int i = 0; i < openList.size(); i++) {
+                // Find the cost of traveling to this node.
+                getCost(openList.get(i));
+                if(!openList.get(i).checked){
+                    step++;
+                }
+                openList.get(i).setAsChecked();
+                // Check if this node's G cost is better.
+                if (openList.get(i).gCost < bestNodeGCost){
+                    bestNodeIndex = i;
+                    bestNodeGCost = openList.get(i).gCost;
+
+                }
+            }
+            // Get the next best node for out next step.
+            currentNode = openList.get(bestNodeIndex);
+            if (currentNode == goalNode) {
+                goalReached = true;
+                trackThePath();
+                break;
+            }
+        }
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Time: " + (endTime - startTime));
+        System.out.println("Nodes Checked : " + step);
     }
 }

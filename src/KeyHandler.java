@@ -8,6 +8,7 @@ public class KeyHandler implements KeyListener {
     public KeyHandler(Panel thePanel){
         myPanel = thePanel;
     }
+
     @Override
     public void keyTyped(KeyEvent e) {
 
@@ -16,18 +17,32 @@ public class KeyHandler implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
+        // A*
         if(code == KeyEvent.VK_1){
-            myPanel.setCostOnNodes();
+            myPanel.mAStar();
         }
         if(code == KeyEvent.VK_2){
-            myPanel.mAStarSearch();
+            myPanel.autoAStar();
         }
+        // BSF
         if(code == KeyEvent.VK_3){
-            myPanel.autoAStarSearch();
+            myPanel.mBFS();
+        }
+        if (code == KeyEvent.VK_4){
+            myPanel.autoBFS();
+        }
+        // Dijkstra
+        if(code == KeyEvent.VK_5){
+            myPanel.mDijkstra();
+        }
+        if (code == KeyEvent.VK_6){
+            myPanel.autoDijkstra();
         }
         if (code == KeyEvent.VK_R){
-
+            myPanel.reset();
         }
+
+
     }
 
     @Override
