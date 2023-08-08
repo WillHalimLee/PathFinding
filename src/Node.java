@@ -1,8 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Comparator;
 
-public class Node extends JButton {
+public class Node extends JButton implements Comparable<Node> {
 
     Node parent;
     int col;
@@ -18,7 +19,7 @@ public class Node extends JButton {
     int gCost, hCost, fCost;
 
 
-    boolean start, goal, solid, open, checked, clicked;
+    boolean start, goal, solid, open, checked, current;
 
     public Node(int theRow, int theCol, Panel thePanel) {
         col = theCol;
@@ -26,7 +27,18 @@ public class Node extends JButton {
         myPanel = thePanel;
         setBackground(Color.white);
         setForeground(Color.BLACK);
+        this.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                myPanel.requestFocusInWindow();
+            }
+        });
+    }
 
+    public void setAsCurrent() {
+        setBackground(Color.lightGray);
+        setForeground(Color.white);
+        setText("C");
     }
     public void setAsStart() {
         setBackground(Color.blue);
@@ -63,5 +75,12 @@ public class Node extends JButton {
     public void setAsPath(){
         setBackground(Color.green);
         setForeground(Color.black);
+        setText("P");
     }
+
+    @Override
+    public int compareTo(Node o) {
+        return Integer.compare(this.gCost, o.gCost);
+    }
+
 }
