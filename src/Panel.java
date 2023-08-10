@@ -8,15 +8,16 @@ import java.util.PriorityQueue;
 public class Panel extends JPanel {
 
 
-    private int maxRow = 15;
-    private int maxCol = 30;
-    private int nodeSize = 60;
+    private int maxRow = 75;
+    private int maxCol = 150;
+    private int nodeSize = 10;
     final int screenWidth = nodeSize * maxCol;
     final int screenHeight = nodeSize * maxRow;
     int step = 0;
     Node[][] node = new Node[maxRow][maxCol];
     Node startNode, goalNode, currentNode;
     ArrayList<Node> openList = new ArrayList<>();
+    PriorityQueue<Node> openPQ = new PriorityQueue<>(10,(a,b) -> a.gCost - b.gCost);
     ArrayList<Node> checkedList = new ArrayList<>();
     boolean goalReached = false;
 
@@ -65,33 +66,19 @@ public class Panel extends JPanel {
 
     }
 
-    public void setCost() {
-        int row = 0;
-        int col = 0;
-
-        while (row < maxRow && col < maxCol) {
-            getCost(node[row][col]);
-            col++;
-            if(col == maxCol) {
-                col = 0;
-                row++;
-            }
-        }
-    }
     /** This is what is used to set up the map*/
     public void setTest(){
-        setStartNode(11,3);
-        setGoalNode(5,27);
-        setGraphTestLine();
-
+        setStartNode(45,20);
+        setGoalNode(3,145);
+        setGraphTestCBig();
     }
     public void setGraphTestLine() {
-        for (int i = 3; i < 12; i++){
-            setSolidNode(i, 15);
+        for (int i = 3; i < 72; i++){
+            setSolidNode(i, 75);
         }
     }
 
-    public void setGraphTestC(){
+    public void setGraphTestCBig(){
         for (int i = 0; i < 10 ; i++) {
             setSolidNode(45-i, 30);
             setSolidNode(45+i, 30);
@@ -101,7 +88,16 @@ public class Panel extends JPanel {
             setSolidNode(55, 30-i);
         }
     }
-
+    public void setGraphTestCSmol(){
+        for (int i = 0; i < 5 ; i++) {
+            setSolidNode(7-i, 10);
+            setSolidNode(7+i, 10);
+        }
+        for (int i = 0; i < 5 ; i++) {
+            setSolidNode(12, 10-i);
+            setSolidNode(2, 10-i);
+        }
+    }
     private void setStartNode(final int row, final int col) {
         node[row][col].setAsStart();
         startNode = node[row][col];
@@ -197,7 +193,41 @@ public class Panel extends JPanel {
         }
 
     }
+    public void checkAroundPQ(int row, int col) {
+        //Top mid
+        if(row - 1 > 0){
+            openPQ.add(node[row-1][col]);
+        }
+        // Right
+        if(col + 1 < maxCol){
+            openPQ.add(node[row][col+1]);
+        }
+        // Bottom mid
+        if(row + 1 < maxRow){
+            openPQ.add(node[row+1][col]);
+        }
+        // Left
+        if(col - 1 > 0){
+            openPQ.add(node[row][col-1]);
+        }
+        // Top left
+        if(row - 1 > 0 && col - 1 > 0){
+            openPQ.add(node[row-1][col-1]);
+        }
+        // Top right
+        if(row - 1 > 0 && col + 1 < maxCol){
+            openPQ.add(node[row-1][col+1]);
+        }
+        // bottom right
+        if(row + 1 < maxRow && col + 1 < maxCol){
+            openPQ.add(node[row+1][col+1]);
+        }
+        // Bottom left
+        if(row + 1 < maxRow && col - 1 > 0){
+            openPQ.add(node[row+1][col-1]);
+        }
 
+    }
     public void mAStar(){
         if (!goalReached){
             int col = currentNode.col;
@@ -245,7 +275,7 @@ public class Panel extends JPanel {
             int col = currentNode.col;
             int row = currentNode.row;
 
-
+            currentNode.setAsChecked();
             checkedList.add(currentNode);
             openList.remove(currentNode);
 
@@ -257,9 +287,9 @@ public class Panel extends JPanel {
             for (int i = 0; i < openList.size(); i++) {
                 // Find the cost of traveling to this node.
                 getCost(openList.get(i));
-                if(!openList.get(i).checked){
+                if(!openList.get(i).checked) {
                     step++;
-
+                }
                 openList.get(i).setAsChecked();
                 // Check if this node's F cost is better.
                 if (openList.get(i).fCost < bestNodeFCost){
@@ -271,7 +301,7 @@ public class Panel extends JPanel {
                         bestNodeFCost = openList.get(i).fCost;
                     }
                 }
-                }
+
             }
             // Get the next best node for out next step.
             currentNode = openList.get(bestNodeIndex);
@@ -291,6 +321,8 @@ public class Panel extends JPanel {
             int col = currentNode.col;
             int row = currentNode.row;
 
+
+            currentNode.setAsChecked();
             checkedList.add(currentNode);
             openList.remove(currentNode);
             if (currentNode != startNode){
@@ -328,10 +360,12 @@ public class Panel extends JPanel {
             int col = currentNode.col;
             int row = currentNode.row;
 
+            currentNode.setAsChecked();
             checkedList.add(currentNode);
             openList.remove(currentNode);
 
             checkAround(row, col);
+
             int bestNodeIndex = 0;
             int bestNodeHCost = Integer.MAX_VALUE;
 
@@ -341,8 +375,8 @@ public class Panel extends JPanel {
                 if(!openList.get(i).checked){
                     step++;
                 }
-                openList.get(i).setAsChecked();
 
+                openList.get(i).setAsChecked();
                 if (openList.get(i).hCost < bestNodeHCost){
                     bestNodeIndex = i;
                     bestNodeHCost = openList.get(i).hCost;
@@ -432,6 +466,41 @@ public class Panel extends JPanel {
             }
         }
 
+        long endTime = System.currentTimeMillis();
+        System.out.println("Time: " + (endTime - startTime));
+        System.out.println("Nodes Checked : " + step);
+    }
+    public void autoDijkstraPQ(){
+        long startTime = System.currentTimeMillis();
+
+        while (!goalReached){
+            int col = currentNode.col;
+            int row = currentNode.row;
+
+            checkedList.add(currentNode);
+            openList.remove(currentNode);
+            checkAroundPQ(row, col);
+
+            int bestNodeIndex = 0;
+            int bestNodeGCost = Integer.MAX_VALUE;
+            while (!openPQ.isEmpty()){
+                Node node = openPQ.poll();
+                getCost(node);
+                if(!node.checked){
+                    step++;
+                }
+                node.setAsChecked();
+
+                if (node.gCost < bestNodeGCost){
+                    bestNodeGCost = node.gCost;
+                }
+                if (currentNode == goalNode) {
+                    goalReached = true;
+                    trackThePath();
+                    break;
+                }
+            }
+        }
         long endTime = System.currentTimeMillis();
         System.out.println("Time: " + (endTime - startTime));
         System.out.println("Nodes Checked : " + step);

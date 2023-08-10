@@ -22,6 +22,7 @@ public class KeyHandler implements KeyListener {
             myPanel.mAStar();
         }
         if(code == KeyEvent.VK_2){
+            System.out.println("A Star");
             myPanel.autoAStar();
         }
         // BSF
@@ -29,6 +30,7 @@ public class KeyHandler implements KeyListener {
             myPanel.mBFS();
         }
         if (code == KeyEvent.VK_4){
+            System.out.println("BFS");
             myPanel.autoBFS();
         }
         // Dijkstra
@@ -36,7 +38,8 @@ public class KeyHandler implements KeyListener {
             myPanel.mDijkstra();
         }
         if (code == KeyEvent.VK_6){
-            myPanel.autoDijkstra();
+            System.out.println("Dijkstra");
+            myPanel.autoDijkstraPQ();
         }
         if (code == KeyEvent.VK_R){
             myPanel.reset();
