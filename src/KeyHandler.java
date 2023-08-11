@@ -1,8 +1,12 @@
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+/**
+ * A class the allows keyboard interactions.
+ * */
 public class KeyHandler implements KeyListener {
 
+    /** The panel the displays the algorithms*/
     Panel myPanel;
 
     public KeyHandler(Panel thePanel){
@@ -39,7 +43,7 @@ public class KeyHandler implements KeyListener {
         }
         if (code == KeyEvent.VK_6){
             System.out.println("Dijkstra");
-            myPanel.autoDijkstraPQ();
+            myPanel.autoDijkstra();
         }
         if (code == KeyEvent.VK_R){
             myPanel.reset();
